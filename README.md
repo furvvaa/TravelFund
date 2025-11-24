@@ -50,3 +50,8 @@ This project is built as a clean frontend prototype using **HTML, CSS, Bootstrap
 ---
 
 ## Project Structure
+TravelFund/
+│── index.html
+│── styles.css
+│── app.js
+└── README.md
