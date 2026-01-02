@@ -55,3 +55,48 @@ TravelFund/
 │── styles.css
 │── app.js
 └── README.md
+
+<br>
+import { useMemo, useState } from "react";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import About from "./components/About";
+import TripPanel from "./components/TripPanel";
+import Participants from "./components/Participants";
+import Expenses from "./components/Expenses";
+import SettlementModal from "./components/SettlementModal";
+
+function makeId(prefix) {
+  return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
+export default function App() {
+  const [trips, setTrips] = useState([]); // {id,name,currency,participants[],expenses[]}
+  const [activeTripId, setActiveTripId] = useState(null);
+
+  const activeTrip = useMemo(
+    () => trips.find((t) => t.id === activeTripId) || null,
+    [trips, activeTripId]
+  );
+
+  const balances = useMemo(() => {
+    if (!activeTrip) {
+      return { peopleCount: 0, totalSpent: 0, perPerson: 0, rows: [] };
+    }
+    const peopleCount = activeTrip.participants.length;
+    const totalSpent = activeTrip.expenses.reduce((sum, e) => sum + e.amount, 0);
+    const perPerson = peopleCount > 0 ? totalSpent / peopleCount : 0;
+
+    const rows = activeTrip.participants.map((p) => {
+      const paidTotal = activeTrip.expenses
+        .filter((e) => e.paidBy === p.id)
+        .reduce((sum, e) => sum + e.amount, 0);
+
+      const shouldPay = perPerson;
+      const balance = paidTotal - shouldPay;
+
+      return { id: p.id, name: p.name, paidTotal, shouldPay, balance };
+    });
+
+    return { peopleCount, totalSpent, perPerson, rows };
+  }, [activeTrip]);
